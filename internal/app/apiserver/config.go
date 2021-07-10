@@ -4,7 +4,6 @@ import "github.com/spf13/viper"
 
 type Config struct {
 	BindAddr string
-	LogLevel string
 }
 
 func InitConfig(path string) error {
@@ -14,8 +13,5 @@ func InitConfig(path string) error {
 }
 
 func NewConfig() *Config {
-	return &Config{
-		BindAddr: viper.GetString("bind_adder"),
-		LogLevel: viper.GetString("log_level"),
-	}
+	return &Config{BindAddr: viper.GetString("bind_adder")}
 }
