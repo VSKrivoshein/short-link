@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/VSKrivoshein/short-link/internal/app/apiserver"
 	"log"
 )
@@ -17,7 +16,6 @@ func init() {
 
 func main() {
 	flag.Parse()
-	fmt.Println("configPath", configPath)
 
 	if err := apiserver.InitConfig(configPath); err != nil {
 		log.Fatalf("config is not initialized: %s", err.Error())
