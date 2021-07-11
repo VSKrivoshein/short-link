@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"github.com/VSKrivoshein/short-link/internal/app/store"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -10,6 +11,7 @@ type APIServer struct {
 	config *Config
 	logger *logrus.Logger
 	router *gin.Engine
+	store  *store.Store
 }
 
 func NewAPIServer(config *Config) *APIServer {
@@ -26,6 +28,11 @@ func (s *APIServer) Start() error {
 	}
 
 	s.configureRouter()
+
+	if err := s.configureStore(); err != nil {
+		return err
+	}
+
 	s.logger.Info("starting api server")
 	return http.ListenAndServe(s.config.BindAddr, s.router)
 }
@@ -41,8 +48,20 @@ func (s *APIServer) configureLogger() error {
 	return nil
 }
 
-func (s *APIServer) configureRouter()  {
+// todo refactor
+func (s *APIServer) configureRouter() {
 	s.router.GET("/hello", s.handleHello())
+}
+
+func (s *APIServer) configureStore() error {
+	st := store.NewStore(s.config.Store)
+	if err := st.Open(); err != nil {
+		return err
+	}
+
+	s.store = st
+
+	return nil
 }
 
 func (s *APIServer) handleHello() gin.HandlerFunc {
@@ -50,3 +69,4 @@ func (s *APIServer) handleHello() gin.HandlerFunc {
 		c.String(http.StatusOK, "Hello")
 	}
 }
+
