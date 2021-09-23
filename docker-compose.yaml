@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:13-alpine
+    container_name: "short-database"
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    networks:
+      - dev
+    volumes:
+      - database_posgres:/var/lib/postgresql/data
+
+  migrator:
+    profiles: [ "migrator" ]
+    restart: on-failure
+    build: ./migrator
+    container_name: "migrator"
+    ports:
+      - "6000:6000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - dev
+
+  api:
+    build: .
+    container_name: "short-link"
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - dev
+
+volumes:
+  database_posgres:
+
+networks:
+  dev:
+    driver: bridge

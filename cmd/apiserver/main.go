@@ -1,32 +1,28 @@
 package main
 
 import (
-	"flag"
-	"github.com/VSKrivoshein/short-link/internal/app/apiserver"
-	"log"
+	cnf "github.com/VSKrivoshein/short-link/internal/app/configs"
+	u "github.com/VSKrivoshein/short-link/internal/app/utils"
+	"github.com/sirupsen/logrus"
 )
 
-var (
-	configPath string
-)
-
-func init() {
-	flag.StringVar(&configPath, "config-path", "configs/apiserver.yaml", "path to config file")
-}
-
+// @title Short link with authorization
+// @version 1.0
+// @description Service of the short link with authorization, hexagonal architecture, integration test
+// @host localhost:8080
 func main() {
-	flag.Parse()
+	u.UseJSONLogFormat()
 
-	if err := apiserver.InitConfig(configPath); err != nil {
-		log.Fatalf("config is not initialized: %s", err.Error())
-	}
+	handler := cnf.InitServices()
 
-	config := apiserver.NewConfig()
+	errors := make(chan error, 2)
+	go func() {
+		errors <- cnf.StartServices(handler)
+	}()
 
-	s := apiserver.NewAPIServer(config)
+	go func() {
+		errors <- cnf.GracefulShutdown()
+	}()
 
-	if err := s.Start(); err != nil {
-		log.Fatal(err)
-	}
-
+	logrus.Fatalf("Terminated %s", <-errors)
 }

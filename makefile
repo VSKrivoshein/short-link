@@ -1,5 +1,11 @@
-default:
-	go build -v ./cmd/apiserver && ./apiserver
+start-initial:
+	docker-compose --env-file=.env --profile migrator up --build
+
+start:
+	docker-compose --env-file=.env up
 
 test:
-	go test -v -race -timeout 10s ./...
+	docker-compose -f docker-compose.test.yaml --env-file=test.env --profile migrator up --build
+
+down:
+	docker-compose down --volumes && docker-compose down
