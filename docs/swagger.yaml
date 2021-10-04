@@ -1,0 +1,312 @@
+definitions:
+  api.CreateLinkInput:
+    properties:
+      link:
+        example: https://ya.ru/
+        type: string
+    required:
+    - link
+    type: object
+  api.CreateLinkResp:
+    properties:
+      link:
+        example: https://ya.ru/
+        type: string
+      redirect_url:
+        example: localhost:8080/a425tq
+        type: string
+    type: object
+  api.DeleteUserInput:
+    properties:
+      email:
+        example: test@mail.ru
+        type: string
+      password:
+        example: qwerty
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  api.ErrResponse:
+    properties:
+      error:
+        example: user definition of error
+        type: string
+    type: object
+  api.GetAllLinksResp:
+    properties:
+      all_user_links:
+        additionalProperties:
+          type: string
+        example:
+          short url: original url
+        type: object
+    type: object
+  api.SignInInput:
+    properties:
+      email:
+        example: test@mail.ru
+        type: string
+      password:
+        example: qwerty
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  api.SignUpInput:
+    properties:
+      email:
+        example: test@mail.ru
+        type: string
+      password:
+        example: qwerty
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Service of the short link with authorization, hexagonal architecture,
+    integration test
+  title: Short link with authorization
+  version: "1.0"
+paths:
+  /{hash}:
+    get:
+      description: url with hash will "redirect" user to link from service
+      parameters:
+      - description: hash that was generated during creating link
+        in: path
+        name: hash
+        required: true
+        type: string
+      responses:
+        "307":
+          description: redirect user to link
+          schema:
+            type: string
+        "404":
+          description: link was not found
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      summary: Redirect
+      tags:
+      - redirect
+  /auth/delete-user:
+    delete:
+      description: Delete existed user with all user links
+      parameters:
+      - description: valid email and password of existed user
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/api.DeleteUserInput'
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "401":
+          description: login or password is incorrect
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "422":
+          description: incorrect struct of request or validation failed
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      summary: Delete user
+      tags:
+      - auth
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Sign in for existed user
+      parameters:
+      - description: valid email and password of existed user
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/api.SignInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "401":
+          description: login or password is incorrect
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "422":
+          description: incorrect struct of request or validation failed
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      summary: Sign in
+      tags:
+      - auth
+  /auth/sign-out:
+    get:
+      description: Remove jwt token
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+      summary: Sign out
+      tags:
+      - auth
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Registration of new user
+      parameters:
+      - description: valid email and password more than 6 chars
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/api.SignUpInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "409":
+          description: email already exist
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "422":
+          description: incorrect struct of request or validation failed
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      summary: Sign up
+      tags:
+      - auth
+  /health:
+    get:
+      description: Check that service alive and ready for traffic
+      responses:
+        "200":
+          description: I am alive
+          schema:
+            type: string
+        "500":
+          description: ""
+      summary: Health check
+      tags:
+      - health
+  /links/create:
+    post:
+      consumes:
+      - application/json
+      description: Creating new redirect from valid url for authenticated user
+      parameters:
+      - description: valid url
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateLinkInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: link and redirect url
+          schema:
+            $ref: '#/definitions/api.CreateLinkResp'
+        "401":
+          description: user should be authenticated
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "409":
+          description: link is already exist
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "422":
+          description: incorrect struct of request or validation failed
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      summary: Creating redirect
+      tags:
+      - links
+  /links/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Delete link with hash
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "401":
+          description: user should be authenticated
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "422":
+          description: link was not found
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      summary: Delete link
+      tags:
+      - links
+  /links/get-all:
+    get:
+      consumes:
+      - application/json
+      description: Get all links that belong to user wit hash
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: pair with link and redirect link
+          schema:
+            $ref: '#/definitions/api.GetAllLinksResp'
+        "401":
+          description: user should be authenticated
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "422":
+          description: incorrect struct of request or validation failed
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      summary: Get all links that belong to user wit hash
+      tags:
+      - links
+swagger: "2.0"
