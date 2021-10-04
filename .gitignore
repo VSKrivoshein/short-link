@@ -1,1 +1,2 @@
 .idea
+/migrator/migrations/000001_init.up.sql
