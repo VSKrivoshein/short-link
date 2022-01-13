@@ -17,11 +17,10 @@ type JSONFormatter struct {
 	Version string
 }
 
-var userId = "userId"
+var userID = "userID"
 
 // UseJSONLogFormat sets up the JSON log formatter
 func UseJSONLogFormat() {
-
 	ginEnv := os.Getenv("GIN_ENV")
 	version := os.Getenv("SERVICE_NAME")
 	program := os.Getenv("SERVICE_NAME")
@@ -52,7 +51,7 @@ func (f *JSONFormatter) Format(entry *log.Entry) ([]byte, error) {
 
 	serialized, err := json.Marshal(data)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to marshal fields to JSON, %v", err)
+		return nil, fmt.Errorf("failed to marshal fields to JSON, %v", err)
 	}
 	return append(serialized, '\n'), nil
 }
@@ -62,11 +61,11 @@ func GetClientIP(c *gin.Context) string {
 	// first check the X-Forwarded-For header
 	requester := c.Request.Header.Get("X-Forwarded-For")
 	// if empty, check the Real-IP header
-	if len(requester) == 0 {
+	if requester == "" {
 		requester = c.Request.Header.Get("X-Real-IP")
 	}
 	// if the requester is still empty, use the hard-coded address from the socket
-	if len(requester) == 0 {
+	if requester == "" {
 		requester = c.Request.RemoteAddr
 	}
 
@@ -79,19 +78,19 @@ func GetClientIP(c *gin.Context) string {
 	return requester
 }
 
-// SetUserId userId in gin context
-func SetUserId(c *gin.Context, id string) {
-	c.Set(userId, id)
+// SetUserID userID in gin context
+func SetUserID(c *gin.Context, id string) {
+	c.Set(userID, id)
 }
 
 // GetUserID gets the current_user ID as a string
 func GetUserID(c *gin.Context) string {
-	userIdInterface, ok := c.Get(userId)
-	userId, ok := userIdInterface.(string)
+	var userIDInterface, _ = c.Get(userID)
+	resUserID, ok := userIDInterface.(string)
 	if !ok {
 		return ""
 	}
-	return userId
+	return resUserID
 }
 
 // GetDurationInMilliseconds takes a start time and returns a duration in milliseconds
@@ -99,6 +98,5 @@ func GetDurationInMilliseconds(start time.Time) float64 {
 	end := time.Now()
 	duration := end.Sub(start)
 	milliseconds := float64(duration) / float64(time.Millisecond)
-	rounded := float64(int(milliseconds*100+.5)) / 100
-	return rounded
+	return milliseconds
 }

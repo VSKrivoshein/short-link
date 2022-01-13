@@ -18,7 +18,7 @@ func CreateLink(t *testing.T, response *http.Response, link string) *http.Respon
 	}
 	body := bytes.NewBuffer(content)
 
-	req, err := http.NewRequest("POST", url, body)
+	req, err := http.NewRequest(http.MethodPost, url, body) //nolint
 	if err != nil {
 		t.Fatalf("CreateLink http.Post Fatal: %v", err)
 	}

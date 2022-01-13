@@ -1,9 +1,9 @@
 package repositories
 
 import (
-	auther_repo "github.com/VSKrivoshein/short-link/internal/app/repository/auther"
+	author_repo "github.com/VSKrivoshein/short-link/internal/app/repository/author"
 	shortener_repo "github.com/VSKrivoshein/short-link/internal/app/repository/shortener"
-	"github.com/VSKrivoshein/short-link/internal/app/services/auther"
+	"github.com/VSKrivoshein/short-link/internal/app/services/author"
 	"github.com/VSKrivoshein/short-link/internal/app/services/shortener"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -12,11 +12,11 @@ import (
 
 type Repositories struct {
 	Shortener shortener.Repository
-	Auther    auther.Repository
+	Author    author.Repository
 }
 
-func NewRepositories(dbUrl string) *Repositories {
-	db, err := sqlx.Connect("postgres", dbUrl)
+func NewRepositories(dbURL string) *Repositories {
+	db, err := sqlx.Connect("postgres", dbURL)
 	if err != nil {
 		logrus.Fatalf("Postgres connection failed %s", err.Error())
 	}
@@ -25,6 +25,6 @@ func NewRepositories(dbUrl string) *Repositories {
 
 	return &Repositories{
 		Shortener: shortener_repo.NewRepository(db),
-		Auther:    auther_repo.NewRepository(db),
+		Author:    author_repo.NewRepository(db),
 	}
 }

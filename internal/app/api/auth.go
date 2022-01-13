@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/VSKrivoshein/short-link/internal/app/e"
-	"github.com/VSKrivoshein/short-link/internal/app/services/auther"
+	"github.com/VSKrivoshein/short-link/internal/app/services/author"
 	u "github.com/VSKrivoshein/short-link/internal/app/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -28,11 +28,10 @@ type SignInInput struct {
 // @Failure 500 {object} ErrResponse "internal server error"
 // @Router /auth/sign-in [post]
 func (h *Handler) signIn(c *gin.Context) {
-
 	var input SignInInput
 
 	if err := c.BindJSON(&input); err != nil {
-		c.Error(e.New(
+		_ = c.Error(e.New(
 			err,
 			e.ErrUnprocessableEntity,
 			http.StatusUnprocessableEntity),
@@ -40,17 +39,17 @@ func (h *Handler) signIn(c *gin.Context) {
 		return
 	}
 
-	user := auther.User{
+	user := author.User{
 		Email:    input.Email,
 		Password: input.Password,
 	}
 
-	if err := h.Services.Auther.SingIn(&user); err != nil {
-		c.Error(err)
+	if err := h.Services.Author.SingIn(&user); err != nil {
+		_ = c.Error(err)
 		return
 	}
 
-	maxEdgeSeconds := int(user.TokenExpiration.Sub(time.Now()) / time.Second)
+	maxEdgeSeconds := int(time.Until(user.TokenExpiration) / time.Second)
 
 	c.SetCookie(
 		ShortenerCookieName,
@@ -83,23 +82,23 @@ func (h *Handler) signUp(c *gin.Context) {
 	var input SignUpInput
 
 	if err := c.BindJSON(&input); err != nil {
-		c.Error(e.New(err, e.ErrUnprocessableEntity, http.StatusUnprocessableEntity))
+		_ = c.Error(e.New(err, e.ErrUnprocessableEntity, http.StatusUnprocessableEntity))
 		return
 	}
 
-	user := auther.User{
+	user := author.User{
 		Email:    input.Email,
 		Password: input.Password,
 	}
 
-	if err := h.Services.Auther.SingUp(&user); err != nil {
-		c.Error(err)
+	if err := h.Services.Author.SingUp(&user); err != nil {
+		_ = c.Error(err)
 	}
 
 	c.SetCookie(
 		ShortenerCookieName,
 		user.TokenString,
-		int(user.TokenExpiration.Sub(time.Now())/time.Second),
+		int(time.Until(user.TokenExpiration)/time.Second),
 		"/",
 		h.Config.Host,
 		false,
@@ -142,22 +141,22 @@ func (h *Handler) deleteUser(c *gin.Context) {
 	var input DeleteUserInput
 
 	if err := c.BindJSON(&input); err != nil {
-		c.Error(e.New(err, e.ErrUnprocessableEntity, http.StatusUnprocessableEntity))
+		_ = c.Error(e.New(err, e.ErrUnprocessableEntity, http.StatusUnprocessableEntity))
 		return
 	}
 
-	user := auther.User{
+	user := author.User{
 		Email:    input.Email,
 		Password: input.Password,
 	}
 
-	if err := h.Services.Auther.SingIn(&user); err != nil {
-		c.Error(err)
+	if err := h.Services.Author.SingIn(&user); err != nil {
+		_ = c.Error(err)
 		return
 	}
 
-	if err := h.Services.Auther.DeleteUser(&user); err != nil {
-		c.Error(err)
+	if err := h.Services.Author.DeleteUser(&user); err != nil {
+		_ = c.Error(err)
 		return
 	}
 
@@ -178,28 +177,28 @@ func (h *Handler) checkAuthAndRefreshMiddleware(c *gin.Context) {
 	jwtString, err := c.Cookie(ShortenerCookieName)
 	if err != nil {
 		if err == http.ErrNoCookie {
-			c.Error(e.New(err, e.ErrUserUnauthorized, http.StatusUnauthorized))
+			_ = c.Error(e.New(err, e.ErrUserUnauthorized, http.StatusUnauthorized))
 			return
 		}
-		c.Error(e.New(err, e.ErrToken, http.StatusInternalServerError))
+		_ = c.Error(e.New(err, e.ErrToken, http.StatusInternalServerError))
 		return
 	}
 
-	user := auther.User{
+	user := author.User{
 		TokenString: jwtString,
 	}
 
-	if err := h.Services.Auther.CheckAuthAndRefresh(&user); err != nil {
-		c.Error(err)
+	if err := h.Services.Author.CheckAuthAndRefresh(&user); err != nil {
+		_ = c.Error(err)
 		return
 	}
 
-	u.SetUserId(c, user.UserId)
+	u.SetUserID(c, user.UserID)
 
 	c.SetCookie(
 		ShortenerCookieName,
 		user.TokenString,
-		int(user.TokenExpiration.Sub(time.Now())/time.Second),
+		int(time.Until(user.TokenExpiration)/time.Second),
 		"/",
 		h.Config.Host,
 		false,

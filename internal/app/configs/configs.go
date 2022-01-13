@@ -13,7 +13,7 @@ import (
 )
 
 func InitServices() *api.Handler {
-	var dbUrl = fmt.Sprintf(
+	var dbURL = fmt.Sprintf(
 		"postgres://%v:%v@%v:%v/%v?sslmode=disable",
 		os.Getenv("DB_USERNAME"),
 		os.Getenv("DB_PASSWORD"),
@@ -22,7 +22,7 @@ func InitServices() *api.Handler {
 		os.Getenv("DB_TABLE"),
 	)
 
-	repos := repositories.NewRepositories(dbUrl)
+	repos := repositories.NewRepositories(dbURL)
 	service := services.NewServices(repos)
 
 	return api.NewHandler(service)

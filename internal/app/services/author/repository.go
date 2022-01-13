@@ -1,4 +1,4 @@
-package auther
+package author
 
 type Repository interface {
 	GetUser(user *User) error

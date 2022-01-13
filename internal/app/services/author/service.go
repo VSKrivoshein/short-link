@@ -1,4 +1,4 @@
-package auther
+package author
 
 type Service interface {
 	SingIn(user *User) error

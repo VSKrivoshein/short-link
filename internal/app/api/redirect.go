@@ -16,13 +16,12 @@ import (
 // @Failure 404 {object} ErrResponse "link was not found"
 // @Router /{hash} [get]
 func (h *Handler) redirect(c *gin.Context) {
-
 	redirect := shortener.Redirect{
 		LinkHash: c.Param("hash"),
 	}
 
 	if err := h.Services.Shortener.GetLink(&redirect); err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 
@@ -54,7 +53,7 @@ func (h *Handler) create(c *gin.Context) {
 	var redirect shortener.Redirect
 
 	if err := c.BindJSON(&redirect); err != nil {
-		c.Error(e.New(
+		_ = c.Error(e.New(
 			err,
 			e.ErrUnprocessableEntity,
 			http.StatusUnprocessableEntity),
@@ -62,16 +61,16 @@ func (h *Handler) create(c *gin.Context) {
 		return
 	}
 
-	userId := u.GetUserID(c)
-	if userId == "" {
-		c.Error(e.New(e.ErrUserIdWasNotFound, e.ErrUserUnauthorized, http.StatusUnauthorized))
+	userID := u.GetUserID(c)
+	if userID == "" {
+		_ = c.Error(e.New(e.ErrUserIDWasNotFound, e.ErrUserUnauthorized, http.StatusUnauthorized))
 		return
 	}
 
-	redirect.UserId = userId
+	redirect.UserID = userID
 
 	if err := h.Services.Shortener.CreateLink(&redirect); err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 
@@ -100,16 +99,16 @@ type GetAllLinksResp struct {
 func (h *Handler) getAllLinks(c *gin.Context) {
 	var redirect shortener.Redirect
 
-	userId := u.GetUserID(c)
-	if userId == "" {
-		c.Error(e.New(e.ErrUserIdWasNotFound, e.ErrUserUnauthorized, http.StatusUnauthorized))
+	userID := u.GetUserID(c)
+	if userID == "" {
+		_ = c.Error(e.New(e.ErrUserIDWasNotFound, e.ErrUserUnauthorized, http.StatusUnauthorized))
 		return
 	}
 
-	redirect.UserId = userId
+	redirect.UserID = userID
 
 	if err := h.Services.Shortener.GetAllLinks(&redirect); err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 
@@ -139,20 +138,20 @@ func (h *Handler) deleteLink(c *gin.Context) {
 	var redirect shortener.Redirect
 
 	if err := c.BindJSON(&redirect); err != nil {
-		c.Error(e.New(err, e.ErrUnprocessableEntity, http.StatusUnprocessableEntity))
+		_ = c.Error(e.New(err, e.ErrUnprocessableEntity, http.StatusUnprocessableEntity))
 		return
 	}
 
-	userId := u.GetUserID(c)
-	if userId == "" {
-		c.Error(e.New(e.ErrUserIdWasNotFound, e.ErrUserUnauthorized, http.StatusUnauthorized))
+	userID := u.GetUserID(c)
+	if userID == "" {
+		_ = c.Error(e.New(e.ErrUserIDWasNotFound, e.ErrUserUnauthorized, http.StatusUnauthorized))
 		return
 	}
 
-	redirect.UserId = userId
+	redirect.UserID = userID
 
 	if err := h.Services.Shortener.DeleteLink(&redirect); err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 

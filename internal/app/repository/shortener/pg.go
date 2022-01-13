@@ -1,10 +1,11 @@
-package shortener_repo
+package shortenerrepo
 
 import (
+	"net/http"
+
 	"github.com/VSKrivoshein/short-link/internal/app/e"
 	"github.com/VSKrivoshein/short-link/internal/app/services/shortener"
 	"github.com/jmoiron/sqlx"
-	"net/http"
 )
 
 type repository struct {
@@ -39,7 +40,7 @@ func (r *repository) GetAllLinks(redirect *shortener.Redirect) error {
 		FROM links 
 		    JOIN users u 
 		        ON u.id = links.user_id 
-		WHERE user_id=$1;`, redirect.UserId); err != nil {
+		WHERE user_id=$1;`, redirect.UserID); err != nil {
 		return e.New(err, e.ErrGetAllLinks, http.StatusInternalServerError)
 	}
 
@@ -58,7 +59,7 @@ func (r *repository) CreateLink(redirect *shortener.Redirect) error {
 		INSERT INTO links (id, user_id, link, link_hash) 
 		VALUES (gen_random_uuid(), $1, $2, $3)
 		RETURNING link, link_hash;`,
-		redirect.UserId,
+		redirect.UserID,
 		redirect.Link,
 		redirect.LinkHash,
 	).StructScan(redirect); err != nil {

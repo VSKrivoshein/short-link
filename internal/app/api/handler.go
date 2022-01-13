@@ -24,7 +24,7 @@ type Handler struct {
 	Config   Config
 }
 
-func NewHandler(services *services.Services) *Handler {
+func NewHandler(s *services.Services) *Handler {
 	config := Config{
 		Protocol: os.Getenv("SRV_PROTOCOL"),
 		Host:     os.Getenv("SRV_HOST"),
@@ -38,7 +38,7 @@ func NewHandler(services *services.Services) *Handler {
 			os.Getenv("SRV_PORT")),
 	}
 
-	return &Handler{services, config}
+	return &Handler{s, config}
 }
 
 func (h *Handler) InitRoutes(mode string) *gin.Engine {
@@ -55,7 +55,7 @@ func (h *Handler) InitRoutes(mode string) *gin.Engine {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	auth := r.Group("/auth")
-	{
+	{ //nolint
 		auth.POST("/sign-in", h.signIn)
 		auth.POST("/sign-up", h.signUp)
 		auth.GET("/sign-out", h.signOut)
@@ -63,7 +63,7 @@ func (h *Handler) InitRoutes(mode string) *gin.Engine {
 	}
 
 	links := r.Group("/links", h.checkAuthAndRefreshMiddleware)
-	{
+	{ //nolint
 		links.GET("/get-all", h.getAllLinks)
 		links.POST("/create", h.create)
 		links.DELETE("/delete", h.deleteLink)

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/VSKrivoshein/short-link/internal/app/api"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 )
@@ -14,7 +14,7 @@ var (
 	contentType = "application/json"
 )
 
-func SignUp(t *testing.T, email string, password string) *http.Response {
+func SignUp(t *testing.T, email, password string) *http.Response {
 	url := fmt.Sprintf("%v/auth/sign-up", TestSrv.URL)
 	content, err := json.Marshal(api.SignUpInput{
 		Email:    email,
@@ -25,7 +25,7 @@ func SignUp(t *testing.T, email string, password string) *http.Response {
 	}
 
 	body := bytes.NewBuffer(content)
-	resp, err := http.Post(url, contentType, body)
+	resp, err := http.Post(url, contentType, body) // nolint
 	if err != nil {
 		t.Fatalf("SignUp http.Post fatal: %v", err)
 	}
@@ -33,7 +33,7 @@ func SignUp(t *testing.T, email string, password string) *http.Response {
 	return resp
 }
 
-func DeleteUser(t *testing.T, email string, password string) *http.Response {
+func DeleteUser(t *testing.T, email, password string) *http.Response {
 	urlDelete := fmt.Sprintf("%v/auth/delete-user", TestSrv.URL)
 	content, err := json.Marshal(api.SignUpInput{
 		Email:    email,
@@ -45,7 +45,7 @@ func DeleteUser(t *testing.T, email string, password string) *http.Response {
 
 	client := &http.Client{}
 
-	req, err := http.NewRequest("DELETE", urlDelete, bytes.NewBuffer(content))
+	req, err := http.NewRequest(http.MethodDelete, urlDelete, bytes.NewBuffer(content)) // nolint
 	if err != nil {
 		t.Fatalf("Fatal http.NewRequest(\"DELETE\", contentType, bytes.NewBuffer(content)): %v", err)
 	}
@@ -60,7 +60,7 @@ func DeleteUser(t *testing.T, email string, password string) *http.Response {
 	return resp
 }
 
-func SignIn(t *testing.T, email string, password string) *http.Response {
+func SignIn(t *testing.T, email, password string) *http.Response {
 	url := fmt.Sprintf("%v/auth/sign-in", TestSrv.URL)
 	content, err := json.Marshal(api.SignUpInput{
 		Email:    email,
@@ -70,25 +70,23 @@ func SignIn(t *testing.T, email string, password string) *http.Response {
 		t.Fatalf("CreateUser marshal fatal: %v", err)
 	}
 	body := bytes.NewBuffer(content)
-	resp, err := http.Post(url, contentType, body)
+	resp, err := http.Post(url, contentType, body) // nolint
 	if err != nil {
 		t.Fatalf("SignIn http.Post fatal: %v", err)
 	}
 	return resp
 }
 
-func RespToString(t *testing.T,  resp *http.Response) string {
-	body, err := ioutil.ReadAll(resp.Body)
+func RespToString(t *testing.T, resp *http.Response) string {
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatalf("respToString: Fatal ioutil.ReadAll: %v", err)
 	}
 	return string(body)
 }
 
-func RespClose(t *testing.T, resp *http.Response)  {
+func RespClose(t *testing.T, resp *http.Response) {
 	if err := resp.Body.Close(); err != nil {
 		t.Fatalf("Fatal closing resp")
 	}
 }
-
-

@@ -28,13 +28,13 @@ func TestCreateLink(t *testing.T) {
 
 	// rm user
 	defer func() {
-		respDel := DeleteUser(t, email, password)
+		respDel := DeleteUser(t, email, password) //nolint:bodyclose
 		defer RespClose(t, respDel)
 		assert.Equal(t, http.StatusOK, respDel.StatusCode)
 	}()
 
 	// Test creating link
-	resp := CreateLink(t, respSignUp, link)
+	resp := CreateLink(t, respSignUp, link) //nolint:bodyclose
 	defer RespClose(t, resp)
 
 	respStruct := new(api.CreateLinkResp)
@@ -65,13 +65,13 @@ func TestCreateExistedLink(t *testing.T) {
 
 	// rm user
 	defer func() {
-		respDel := DeleteUser(t, email, password)
+		respDel := DeleteUser(t, email, password) //nolint:bodyclose
 		defer RespClose(t, respDel)
 		assert.Equal(t, http.StatusOK, respDel.StatusCode)
 	}()
 
 	// Test creating link
-	resp := CreateLink(t, respSignUp, link)
+	resp := CreateLink(t, respSignUp, link) //nolint:bodyclose
 	defer RespClose(t, resp)
 
 	if resp.StatusCode != http.StatusOK {
@@ -79,7 +79,7 @@ func TestCreateExistedLink(t *testing.T) {
 	}
 
 	// Try Creating existed link
-	respExisted := CreateLink(t, respSignUp, link)
+	respExisted := CreateLink(t, respSignUp, link) //nolint:bodyclose
 
 	assert.NotEqual(t, http.StatusOK, respExisted.StatusCode)
 }
@@ -94,7 +94,7 @@ func TestCreateLinkUnauthorized(t *testing.T) {
 	respSignUp := new(http.Response)
 
 	// Test creating link
-	resp := CreateLink(t, respSignUp, link)
+	resp := CreateLink(t, respSignUp, link) //nolint:bodyclose
 	defer RespClose(t, resp)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 }
@@ -116,13 +116,13 @@ func TestCreateLinkInvalidUrl(t *testing.T) {
 
 	// rm user
 	defer func() {
-		respDel := DeleteUser(t, email, password)
+		respDel := DeleteUser(t, email, password) //nolint:bodyclose
 		defer RespClose(t, respDel)
 		assert.Equal(t, http.StatusOK, respDel.StatusCode)
 	}()
 
 	// Test creating link
-	resp := CreateLink(t, respSignUp, link)
+	resp := CreateLink(t, respSignUp, link) //nolint:bodyclose
 	defer RespClose(t, resp)
 	assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 }
@@ -145,7 +145,7 @@ func TestGetAllLinks(t *testing.T) {
 
 	// rm user
 	defer func() {
-		respDel := DeleteUser(t, email, password)
+		respDel := DeleteUser(t, email, password) //nolint:bodyclose
 		defer RespClose(t, respDel)
 		assert.Equal(t, http.StatusOK, respDel.StatusCode)
 	}()
@@ -157,7 +157,7 @@ func TestGetAllLinks(t *testing.T) {
 		RespClose(t, resp)
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, http.NoBody) //nolint
 	if err != nil {
 		t.Fatalf("Fatal creating new request http.NewRequest: %v", err)
 	}
@@ -166,7 +166,7 @@ func TestGetAllLinks(t *testing.T) {
 		req.AddCookie(cookie)
 	}
 
-	resp, err := TestSrv.Client().Do(req)
+	resp, err := TestSrv.Client().Do(req) //nolint:bodyclose
 	defer RespClose(t, resp)
 	if err != nil {
 		t.Fatalf("Fatal TestSrv.Client().Do(req): %v", err)
@@ -199,12 +199,12 @@ func TestDeleteLink(t *testing.T) {
 
 	// rm user
 	defer func() {
-		respDel := DeleteUser(t, email, password)
+		respDel := DeleteUser(t, email, password) //nolint:bodyclose
 		defer RespClose(t, respDel)
 		assert.Equal(t, http.StatusOK, respDel.StatusCode)
 	}()
 
-	respCreate := CreateLink(t, respSignUp, link)
+	respCreate := CreateLink(t, respSignUp, link) //nolint:bodyclose
 	defer RespClose(t, respCreate)
 	if respCreate.StatusCode != http.StatusOK {
 		t.Fatalf("Fatal CreateLink(t, respSignUp, link): %v", respCreate.StatusCode)
@@ -216,7 +216,7 @@ func TestDeleteLink(t *testing.T) {
 		t.Fatalf("Fatal json.Marshal(input): %v", err)
 	}
 
-	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(body))
+	req, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(body)) //nolint
 	if err != nil {
 		t.Fatalf("Fatal http.NewRequest: %v", err)
 	}
@@ -225,7 +225,7 @@ func TestDeleteLink(t *testing.T) {
 		req.AddCookie(cookie)
 	}
 
-	resp, err := TestSrv.Client().Do(req)
+	resp, err := TestSrv.Client().Do(req) //nolint:bodyclose
 	defer RespClose(t, resp)
 	if err != nil {
 		t.Fatalf("TestSrv.Client().Do(req): %v", err)

@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-
 // sort err
 
 var (
@@ -21,16 +20,16 @@ var (
 	ErrDeletingUser         = errors.New("error during deleting user")
 	ErrDeletingUserNotFound = errors.New("error during deleting user, user was not found")
 
-	ErrCreatingLink = errors.New("error link is already exist")
-	ErrDeleteLink   = errors.New("error during deleting link")
-	ErrDeleteLinkNotFound   = errors.New("error link was not found")
-	ErrGetLink      = errors.New("error can not find link")
-	ErrGetAllLinks  = errors.New("error during getting all links")
+	ErrCreatingLink       = errors.New("error link is already exist")
+	ErrDeleteLink         = errors.New("error during deleting link")
+	ErrDeleteLinkNotFound = errors.New("error link was not found")
+	ErrGetLink            = errors.New("error can not find link")
+	ErrGetAllLinks        = errors.New("error during getting all links")
 
 	ErrUserUnauthorized    = errors.New("user unauthorized")
 	ErrUnprocessableEntity = errors.New("data structure is not correct")
 
-	ErrUserIdWasNotFound = errors.New("UserIs was not found in create handler")
+	ErrUserIDWasNotFound = errors.New("user was not found in create handler")
 )
 
 type CustomErrorWithCode struct {
@@ -38,7 +37,7 @@ type CustomErrorWithCode struct {
 	Msg  error
 }
 
-func New(originalError error, forUserError error, httpCode int) *CustomErrorWithCode {
+func New(originalError, forUserError error, httpCode int) *CustomErrorWithCode {
 	return &CustomErrorWithCode{
 		Msg:  fmt.Errorf("original error msg: %v, for user error message: %w", originalError, forUserError),
 		Code: httpCode,

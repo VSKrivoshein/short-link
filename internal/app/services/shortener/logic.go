@@ -2,10 +2,11 @@ package shortener
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/VSKrivoshein/short-link/internal/app/e"
 	"github.com/go-playground/validator"
 	"github.com/teris-io/shortid"
-	"net/http"
 )
 
 type service struct {

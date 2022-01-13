@@ -1,13 +1,14 @@
-package auther
+package author
 
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/VSKrivoshein/short-link/internal/app/e"
 	"github.com/go-playground/validator"
 	"github.com/golang-jwt/jwt"
-	"net/http"
-	"time"
 )
 
 var jwtKey = []byte("the_most_secret_key")
@@ -25,7 +26,7 @@ func NewService(repo Repository) Service {
 }
 
 type Claims struct {
-	UserId string
+	UserID string
 	jwt.StandardClaims
 }
 
@@ -51,7 +52,7 @@ func (s *service) SingIn(user *User) error {
 	user.TokenExpiration = GetExpirationTime()
 
 	claims := &Claims{
-		UserId: user.UserId,
+		UserID: user.UserID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: user.TokenExpiration.Unix(),
 		},
@@ -70,7 +71,9 @@ func (s *service) SingIn(user *User) error {
 }
 
 func (s *service) SingUp(user *User) error {
-	if err := s.validator.Struct(user); err != nil {
+	var err error
+
+	if err = s.validator.Struct(user); err != nil {
 		return e.New(err, err, http.StatusUnprocessableEntity)
 	}
 
@@ -81,14 +84,14 @@ func (s *service) SingUp(user *User) error {
 
 	user.PasswordHash = passwordHash
 
-	if err := s.repo.CreateUser(user); err != nil {
+	if err = s.repo.CreateUser(user); err != nil {
 		return fmt.Errorf(e.GetInfo(), err)
 	}
 
 	user.TokenExpiration = GetExpirationTime()
 
 	claims := &Claims{
-		UserId: user.UserId,
+		UserID: user.UserID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: user.TokenExpiration.Unix(),
 		},
@@ -114,7 +117,6 @@ func (s *service) DeleteUser(user *User) error {
 }
 
 func (s *service) CheckAuthAndRefresh(user *User) error {
-
 	claims := &Claims{}
 
 	tkn, err := jwt.ParseWithClaims(
@@ -132,7 +134,7 @@ func (s *service) CheckAuthAndRefresh(user *User) error {
 		return e.New(errors.New("if !tkn.Valid"), e.ErrToken, http.StatusForbidden)
 	}
 
-	if time.Unix(claims.ExpiresAt, 0).Sub(time.Now()) < 2*time.Hour {
+	if time.Until(time.Unix(claims.ExpiresAt, 0)) < 2*time.Hour {
 		return nil
 	}
 
@@ -146,7 +148,7 @@ func (s *service) CheckAuthAndRefresh(user *User) error {
 	}
 
 	user.TokenString = tokenString
-	user.UserId = claims.UserId
+	user.UserID = claims.UserID
 
 	return nil
 }

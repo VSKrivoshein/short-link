@@ -27,12 +27,12 @@ func TestRedirect(t *testing.T) {
 
 	// rm user
 	defer func() {
-		respDel := DeleteUser(t, email, password)
+		respDel := DeleteUser(t, email, password) //nolint:bodyclose
 		defer RespClose(t, respDel)
 		assert.Equal(t, http.StatusOK, respDel.StatusCode)
 	}()
 
-	respCreate := CreateLink(t, respSignUp, link)
+	respCreate := CreateLink(t, respSignUp, link) //nolint:bodyclose
 	defer RespClose(t, respCreate)
 	if respCreate.StatusCode != http.StatusOK {
 		t.Fatalf("Fatal CreateLink(t, respSignUp, link): %v", respCreate.StatusCode)
@@ -48,7 +48,7 @@ func TestRedirect(t *testing.T) {
 	}
 
 	urlString := fmt.Sprintf("%v%v", TestSrv.URL, u.Path)
-	req, err := http.NewRequest("GET", urlString, nil)
+	req, err := http.NewRequest(http.MethodGet, urlString, http.NoBody) // nolint
 	if err != nil {
 		t.Fatalf("Fatal http.NewRequest(\"GET\", out.Link, nil): %v", err)
 	}
@@ -58,7 +58,7 @@ func TestRedirect(t *testing.T) {
 			return http.ErrUseLastResponse
 		},
 	}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) //nolint:bodyclose
 	defer RespClose(t, resp)
 	if err != nil {
 		t.Fatalf("Fatal TestSrv.Client().Do(req): %v", err)

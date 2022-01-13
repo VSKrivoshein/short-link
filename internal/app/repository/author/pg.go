@@ -1,22 +1,22 @@
-package auther_repo
+package authorrepo
 
 import (
-	"github.com/VSKrivoshein/short-link/internal/app/e"
-	"github.com/VSKrivoshein/short-link/internal/app/services/auther"
-	"github.com/jmoiron/sqlx"
 	"net/http"
+
+	"github.com/VSKrivoshein/short-link/internal/app/e"
+	"github.com/VSKrivoshein/short-link/internal/app/services/author"
+	"github.com/jmoiron/sqlx"
 )
 
 type repository struct {
 	db *sqlx.DB
 }
 
-func NewRepository(db *sqlx.DB) auther.Repository {
+func NewRepository(db *sqlx.DB) author.Repository {
 	return &repository{db: db}
 }
 
-
-func (r *repository) CreateUser(user *auther.User) error {
+func (r *repository) CreateUser(user *author.User) error {
 	row, err := r.db.NamedQuery(`
 		INSERT INTO users 
 		VALUES (gen_random_uuid(), :email, :password_hash) 
@@ -35,7 +35,7 @@ func (r *repository) CreateUser(user *auther.User) error {
 	return nil
 }
 
-func (r *repository) GetUser(user *auther.User) error {
+func (r *repository) GetUser(user *author.User) error {
 	err := r.db.Get(user, `
 		SELECT id, email, password_hash 
 		FROM users 
@@ -52,11 +52,11 @@ func (r *repository) GetUser(user *auther.User) error {
 	return nil
 }
 
-func (r *repository) DeleteUser(user *auther.User) error {
+func (r *repository) DeleteUser(user *author.User) error {
 	res, err := r.db.Exec(`
 		DELETE FROM users
 		WHERE id=$1`,
-		user.UserId)
+		user.UserID)
 	if err != nil {
 		return e.New(err, e.ErrDeletingUser, http.StatusInternalServerError)
 	}

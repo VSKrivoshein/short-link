@@ -12,9 +12,9 @@ var TestSrv *httptest.Server
 func TestMain(m *testing.M) {
 	srv := cnf.InitServices().InitRoutes(os.Getenv("SRV_GIN_MODE"))
 	TestSrv = httptest.NewServer(srv)
-	defer TestSrv.Close()
 
 	exitVal := m.Run()
 
+	TestSrv.Close()
 	os.Exit(exitVal)
 }

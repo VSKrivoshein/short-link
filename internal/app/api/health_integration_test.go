@@ -7,9 +7,8 @@ import (
 	"testing"
 )
 
-
 func TestHealth(t *testing.T) {
-	resp, err := http.Get(fmt.Sprintf("%s/health", TestSrv.URL))
+	resp, err := http.Get(fmt.Sprintf("%s/health", TestSrv.URL)) // nolint
 	defer RespClose(t, resp)
 	if err != nil {
 		t.Fatalf("Expected no err")

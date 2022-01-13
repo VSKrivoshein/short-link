@@ -68,15 +68,15 @@ func TestSignUpExistedUser(t *testing.T) {
 	)
 
 	// Perform test
-	resp := SignUp(t, email, password)
+	resp := SignUp(t, email, password) //nolint:bodyclose
 	defer RespClose(t, resp)
 	assert.Equal(t, resp.StatusCode, http.StatusOK, "Creating first user with unique email")
-	respSecond := SignUp(t, email, password)
+	respSecond := SignUp(t, email, password) //nolint:bodyclose
 	defer RespClose(t, respSecond)
 	assert.Equal(t, respSecond.StatusCode, http.StatusConflict, "Creating second user with non unique email")
 
 	// Clean DB
-	respDel := DeleteUser(t, email, password)
+	respDel := DeleteUser(t, email, password) //nolint:bodyclose
 	defer RespClose(t, respDel)
 	assert.Equal(t, respDel.StatusCode, http.StatusOK)
 }
@@ -88,13 +88,13 @@ func TestSignIn(t *testing.T) {
 		email    = "test@email.com"
 		password = "qwerty"
 	)
-	respSetUp := SignUp(t, email, password)
+	respSetUp := SignUp(t, email, password) //nolint:bodyclose
 	defer RespClose(t, respSetUp)
 	assert.Equal(t, respSetUp.StatusCode, http.StatusOK, "Creating first user with unique email")
 
 	// rm user
 	defer func() {
-		respDel := DeleteUser(t, email, password)
+		respDel := DeleteUser(t, email, password) //nolint:bodyclose
 		defer RespClose(t, respDel)
 		assert.Equal(t, respDel.StatusCode, http.StatusOK)
 	}()
@@ -128,7 +128,7 @@ func TestSignIn(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			resp := SignIn(t, test.email, test.password)
+			resp := SignIn(t, test.email, test.password) //nolint:bodyclose
 			defer RespClose(t, resp)
 			assert.Equal(t, resp.StatusCode, test.wantCode)
 
@@ -145,27 +145,27 @@ func TestSignOut(t *testing.T) {
 		email    = "test@email.com"
 		password = "qwerty"
 	)
-	respSetUp := SignUp(t, email, password)
+	respSetUp := SignUp(t, email, password) //nolint:bodyclose
 	defer RespClose(t, respSetUp)
 	assert.Equal(t, respSetUp.StatusCode, http.StatusOK, "Creating first user with unique email")
 
 	// rm user
 	defer func() {
-		respDel := DeleteUser(t, email, password)
+		respDel := DeleteUser(t, email, password) //nolint:bodyclose
 		defer RespClose(t, respDel)
 		assert.Equal(t, respDel.StatusCode, http.StatusOK)
 	}()
 
 	// Test
 	url := fmt.Sprintf("%v/auth/sign-out", TestSrv.URL)
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, http.NoBody) // nolint
 	if err != nil {
 		t.Fatalf("Fatatl http.NewRequest: %v", err)
 	}
 
 	req.Header.Set(api.ShortenerCookieName, "mockJWT")
 
-	resp, err := TestSrv.Client().Do(req)
+	resp, err := TestSrv.Client().Do(req) //nolint:bodyclose
 	defer RespClose(t, resp)
 	if err != nil {
 		t.Fatalf("Fatal TestSrv.Client().Do(): %v", err)
@@ -182,14 +182,14 @@ func TestDeleteUser(t *testing.T) {
 		email    = "test@email.com"
 		password = "qwerty"
 	)
-	respSetUp := SignUp(t, email, password)
+	respSetUp := SignUp(t, email, password) //nolint:bodyclose
 	defer RespClose(t, respSetUp)
 	assert.Equal(t, respSetUp.StatusCode, http.StatusOK, "Creating first user with unique email")
 
 	// rm user
 	defer func() {
 		// Required only in case of fatal one of the test
-		respDel := DeleteUser(t, email, password)
+		respDel := DeleteUser(t, email, password) //nolint:bodyclose
 		defer RespClose(t, respDel)
 	}()
 

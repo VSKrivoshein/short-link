@@ -1,17 +1,21 @@
-package auther
+package author
 
 import (
-	"github.com/VSKrivoshein/short-link/internal/app/e"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"time"
+
+	"github.com/VSKrivoshein/short-link/internal/app/e"
+	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	hashCost = 14
 )
 
 func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), hashCost)
 	if err != nil {
 		return "", e.New(err, e.ErrToken, http.StatusInternalServerError)
-
 	}
 	return string(bytes), nil
 }
@@ -21,6 +25,6 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func GetExpirationTime() time.Time  {
+func GetExpirationTime() time.Time {
 	return time.Now().Add(time.Hour * 3)
 }
